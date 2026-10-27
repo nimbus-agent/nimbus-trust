@@ -1,0 +1,28 @@
+# Summarises what a pull request changes in the Nimbus trust feed, for the reviewer. A green
+# check is a reviewer aid, not the boundary: a pull request can edit this file. The boundary is
+# merging and the trust-sign workflow's required approval.
+name: Trust feed check
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check the trust feed change
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check
+        uses: nimbus-agent/Nimbus/packages/github-actions/registry-action@7c6e86dc7fdfac83314f089a8f788306cef64c21 # v10.7.0
+        with:
+          mode: trust-check

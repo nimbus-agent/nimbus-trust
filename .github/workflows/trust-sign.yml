@@ -1,0 +1,33 @@
+# Builds the next Nimbus trust feed from main's publishers/, requests/ and
+# statements/, signs it with the trust root key and pushes trust.json to gh-pages. Every Nimbus
+# install applies what this signs: before approving a run, read that run's diff and workflow.
+name: Trust feed sign
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trust-sign
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    name: Sign and publish trust.json
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: trust-signing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Sign
+        uses: nimbus-agent/Nimbus/packages/github-actions/registry-action@7c6e86dc7fdfac83314f089a8f788306cef64c21 # v10.7.0
+        with:
+          mode: trust-sign
+          default-branch: "main"
+          root-key: ${{ secrets.NIMBUS_TRUST_ROOT_KEY }}
